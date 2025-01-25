@@ -1,41 +1,43 @@
 import os
-import json
 import requests
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Ensure Heroku uses the correct port
-port = int(os.environ.get("PORT", 5000))
+# Your Telegram Bot Token and Chat ID
+bot_token = 'YOUR_BOT_TOKEN'
+chat_id = 'YOUR_CHAT_ID'
 
-# Home route to check if the server is working
-@app.route('/')
-def home():
-    return "Hello World"
+# Send message to Telegram function
+def send_telegram_notification(message):
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": message
+    }
+    response = requests.post(url, data=payload)
+    print(response.text)  # Log the response from Telegram API
 
-# Route to handle TradingView signals (POST /buy)
-@app.route('/buy', methods=['POST'])
-def buy():
-    try:
-        data = request.get_json()  # Get the JSON payload from TradingView
-        
-        if not data:
-            return jsonify({"error": "No data received"}), 400
-
-        # Log the incoming data for debugging
-        print(f"Received signal: {json.dumps(data, indent=4)}")
-        
-        # Extract the signal from TradingView (for now, we just print it)
-        signal = data.get('signal')
-        if signal:
-            # Handle buy/sell logic here based on the signal
-            return jsonify({"message": f"Signal received: {signal}"}), 200
-        else:
-            return jsonify({"error": "Signal not found in data"}), 400
+@app.route("/buy", methods=["POST"])
+def buy_signal():
+    # Get the JSON data from TradingView
+    signal_data = request.json
+    signal = signal_data.get("signal")
+    price = signal_data.get("price")
+    coin = signal_data.get("coin")
     
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    if signal and price and coin:
+        # Create a message to send to Telegram
+        message = f"Signal received: {signal} for {coin} at price {price}"
+        
+        # Send the message to Telegram
+        send_telegram_notification(message)
+        
+        # Handle your trading logic here (e.g., place order on Binance)
+        
+        return jsonify({"status": "success", "message": "Signal received"})
+    else:
+        return jsonify({"status": "error", "message": "Invalid data received"})
 
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=port, debug=True)
+if __name__ == "__main__":
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
