@@ -1,0 +1,27 @@
+{
+  "name": "tradingview-to-telegram",
+  "description": "Webhook listener for TradingView Buy/Sell signals sent to Telegram",
+  "repository": "https://github.com/your-username/tradingview-to-telegram",
+  "keywords": ["flask", "webhook", "telegram", "bot"],
+  "env": {
+    "TELEGRAM_TOKEN": {
+      "description": "Your Telegram Bot Token",
+      "value": "YOUR_TELEGRAM_BOT_TOKEN"
+    },
+    "TELEGRAM_CHAT_ID": {
+      "description": "Your Telegram Chat ID",
+      "value": "YOUR_CHAT_ID"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  }
+}
