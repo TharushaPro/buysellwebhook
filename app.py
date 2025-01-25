@@ -1,32 +1,53 @@
-import os
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
 @app.route('/')
-def index():
-    return "Webhook is up and running!"
+def home():
+    return "Welcome to the Trading Bot!"
 
 @app.route('/buy', methods=['POST'])
-def buy_signal():
+def buy():
     try:
+        # Check if the request contains JSON data
         data = request.get_json()
-        # Here, you can extract and handle your buy signal data
-        print(f"Buy signal received: {data}")
-        return jsonify({"status": "success", "message": "Buy signal received"})
+
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        # Assuming the 'amount' field is required
+        amount = data.get("amount")
+        if amount is None:
+            return jsonify({"error": "'amount' field is missing in the JSON data"}), 400
+        
+        # Process the buy request (add your buy logic here)
+        return jsonify({"message": f"Buy request received for amount: {amount}"}), 200
+
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
+        # In case of any unexpected errors
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route('/sell', methods=['POST'])
-def sell_signal():
+def sell():
     try:
+        # Check if the request contains JSON data
         data = request.get_json()
-        # Here, you can extract and handle your sell signal data
-        print(f"Sell signal received: {data}")
-        return jsonify({"status": "success", "message": "Sell signal received"})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
 
-if __name__ == "__main__":
-    # Use the PORT provided by Heroku or default to 5000
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+
+        # Assuming the 'amount' field is required
+        amount = data.get("amount")
+        if amount is None:
+            return jsonify({"error": "'amount' field is missing in the JSON data"}), 400
+        
+        # Process the sell request (add your sell logic here)
+        return jsonify({"message": f"Sell request received for amount: {amount}"}), 200
+
+    except Exception as e:
+        # In case of any unexpected errors
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
