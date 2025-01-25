@@ -1,38 +1,32 @@
 import os
-import requests
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Telegram Bot Token and Chat ID (replace with your own)
-TELEGRAM_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'
-TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID'
+@app.route('/')
+def index():
+    return "Webhook is up and running!"
 
-# Telegram API URL
-TELEGRAM_API_URL = f'https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage'
+@app.route('/buy', methods=['POST'])
+def buy_signal():
+    try:
+        data = request.get_json()
+        # Here, you can extract and handle your buy signal data
+        print(f"Buy signal received: {data}")
+        return jsonify({"status": "success", "message": "Buy signal received"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
 
-def send_telegram_message(message):
-    payload = {
-        'chat_id': TELEGRAM_CHAT_ID,
-        'text': message
-    }
-    response = requests.post(TELEGRAM_API_URL, data=payload)
-    return response.json()
-
-@app.route('/webhook', methods=['POST'])
-def handle_signal():
-    data = request.json
-    signal = data.get('signal')
-    symbol = data.get('symbol')
-    price = data.get('price')
-    
-    if signal and symbol and price:
-        # Create message based on the signal
-        message = f"Signal: {signal}\nSymbol: {symbol}\nPrice: {price}"
-        send_telegram_message(message)
-        return jsonify({'status': 'success', 'message': 'Signal sent to Telegram'}), 200
-    else:
-        return jsonify({'status': 'error', 'message': 'Invalid data'}), 400
+@app.route('/sell', methods=['POST'])
+def sell_signal():
+    try:
+        data = request.get_json()
+        # Here, you can extract and handle your sell signal data
+        print(f"Sell signal received: {data}")
+        return jsonify({"status": "success", "message": "Sell signal received"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Use the PORT provided by Heroku or default to 5000
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
